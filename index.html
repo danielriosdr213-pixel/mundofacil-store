@@ -3,122 +3,148 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Mundo Fácil Store</title>
 <style>
 *{box-sizing:border-box}
-body{margin:0;font-family:Arial,sans-serif;background:#f5f6fa;color:#202536}
-header{background:#172554;color:white;padding:28px 16px;text-align:center}
+body{margin:0;font-family:Arial,sans-serif;background:#f4f6f8;color:#222}
+header{background:#172554;color:white;padding:24px 15px;text-align:center}
 header h1{margin:0;font-size:28px}
 header p{margin:10px 0 0}
-main{max-width:1000px;margin:auto;padding:18px}
-.products{display:grid;grid-template-columns:repeat(auto-fit,minmax(145px,1fr));gap:14px}
-.product,.cart{background:white;padding:14px;border-radius:14px;box-shadow:0 2px 9px #0001}
-.photo{height:105px;display:grid;place-items:center;background:#eef2ff;border-radius:10px;font-size:48px}
-.product h3{font-size:17px;margin:12px 0 6px}
-.price{font-weight:bold;color:#166534;font-size:19px}
-button{border:0;border-radius:8px;padding:11px;background:#1d4ed8;color:white;font-weight:bold;cursor:pointer}
-.product button{width:100%;margin-top:10px}
-.cart{margin-top:22px}
-.cart-row{display:flex;justify-content:space-between;align-items:center;gap:8px;margin:12px 0;flex-wrap:wrap}
-.remove{background:#b91c1c;padding:6px}
-.buy{background:#15803d;width:100%;margin-top:12px;font-size:16px}
-footer{text-align:center;padding:25px;color:#555}
+nav{background:#fff;padding:14px;text-align:center;position:sticky;top:0}
+nav a{color:#172554;text-decoration:none;margin:0 10px;font-weight:bold}
+.hero{background:#dbeafe;padding:28px 15px;text-align:center}
+.hero h2{margin-top:0;color:#172554}
+main{max-width:1000px;margin:auto;padding:20px}
+.products{display:grid;grid-template-columns:repeat(auto-fit,minmax(145px,1fr));gap:15px}
+.product{background:white;padding:15px;border-radius:12px;text-align:center;box-shadow:0 2px 8px #0001}
+.product .emoji{font-size:48px}
+.product h3{font-size:17px}
+.price{font-weight:bold;color:#172554;font-size:19px}
+button{border:0;border-radius:7px;padding:11px 13px;background:#172554;color:white;font-weight:bold;cursor:pointer}
+.cart{background:white;border-radius:12px;padding:18px;margin-top:25px}
+.cart button{margin:5px 0}
+.remove{background:#b91c1c;padding:5px 9px}
+footer{background:#172554;color:white;text-align:center;padding:22px;margin-top:25px}
+small{color:#555}
 </style>
 </head>
 <body>
 <header>
 <h1>🛍️ Mundo Fácil Store</h1>
-<p>Productos útiles para hacer tu vida más fácil</p>
+<p>Todo lo que necesitas, en un solo lugar</p>
 </header>
-<main>
-<h2>✨ Nuestros productos</h2>
-<p>Explora nuestros productos y agrega tus favoritos al carrito.</p>
-<div class="products" id="products"></div>
 
-<section class="cart">
-<h2>🛒 Tu carrito (<span id="count">0</span>)</h2>
-<div id="items">Todavía no has agregado productos.</div>
-<h3>Total: <span id="total">$0</span> COP</h3>
-<button class="buy" onclick="checkout()">Pedir por WhatsApp</button>
-<p><small>Consulta disponibilidad, envío y formas de pago al realizar tu pedido.</small></p>
+<nav>
+<a href="#productos">Productos</a>
+<a href="#carrito">Mi carrito 🛒</a>
+</nav>
+
+<section class="hero">
+<h2>¡Bienvenido a nuestra tienda!</h2>
+<p>Encuentra productos prácticos para tu hogar, tu familia y tu día a día.</p>
+<button onclick="document.getElementById('productos').scrollIntoView()">Ver productos</button>
+</section>
+
+<main>
+<h2 id="productos">Nuestros productos</h2>
+<p>Conoce nuestro catálogo y agrega tus productos al carrito.</p>
+
+<div class="products" id="catalogo"></div>
+
+<section class="cart" id="carrito">
+<h2>🛒 Mi carrito</h2>
+<div id="items">Tu carrito está vacío.</div>
+<h3 id="total">Total: $0 COP</h3>
+<button onclick="pedir()">Hacer pedido por WhatsApp</button>
+<p><small>El pago y el envío se confirman al coordinar tu pedido.</small></p>
 </section>
 </main>
-<footer>© Mundo Fácil Store · Colombia</footer>
+
+<footer>
+<h3>Mundo Fácil Store</h3>
+<p>Compras fáciles, prácticas y seguras.</p>
+<p>Contáctanos por WhatsApp para realizar tu pedido.</p>
+</footer>
 
 <script>
 const whatsapp = "573122190613";
 
-const products = [
-{id:1,name:"Audífonos",price:35000,emoji:"🎧"},
-{id:2,name:"Accesorios para celular",price:25000,emoji:"📱"},
-{id:3,name:"Artículo para el hogar",price:30000,emoji:"🏠"},
-{id:4,name:"Juguete infantil",price:40000,emoji:"🧸"}
+// EJEMPLOS: cambia nombres y precios por tus productos reales.
+const productos = [
+ {id:1,nombre:"Audífonos inalámbricos",precio:39900,emoji:"🎧"},
+ {id:2,nombre:"Accesorios para el hogar",precio:29900,emoji:"🏠"},
+ {id:3,nombre:"Juguete infantil",precio:34900,emoji:"🧸"},
+ {id:4,nombre:"Accesorio tecnológico",precio:24900,emoji:"📱"}
 ];
 
-let cart = {};
+let carrito = [];
 
-const money = n => "$" + n.toLocaleString("es-CO");
-
-document.getElementById("products").innerHTML = products.map(p => `
-<article class="product">
-<div class="photo">${p.emoji}</div>
-<h3>${p.name}</h3>
-<div class="price">${money(p.price)} COP</div>
-<button onclick="add(${p.id})">Agregar al carrito</button>
-</article>
-`).join("");
-
-function add(id){
-cart[id]=(cart[id]||0)+1;
-render();
+function dinero(valor){
+ return "$" + valor.toLocaleString("es-CO") + " COP";
 }
 
-function removeItem(id){
-delete cart[id];
-render();
+function mostrarProductos(){
+ document.getElementById("catalogo").innerHTML =
+ productos.map(p => `
+ <article class="product">
+ <div class="emoji">${p.emoji}</div>
+ <h3>${p.nombre}</h3>
+ <p class="price">${dinero(p.precio)}</p>
+ <button onclick="agregar(${p.id})">Agregar al carrito</button>
+ </article>
+ `).join("");
 }
 
-function render(){
-const ids=Object.keys(cart);
-const count=ids.reduce((s,id)=>s+cart[id],0);
-const total=ids.reduce((s,id)=>{
-const p=products.find(p=>p.id==id);
-return s+p.price*cart[id];
-},0);
-
-document.getElementById("count").textContent=count;
-document.getElementById("total").textContent=money(total);
-
-document.getElementById("items").innerHTML=ids.length
-?ids.map(id=>{
-const p=products.find(p=>p.id==id);
-return `<div class="cart-row">
-<span>${p.emoji} ${p.name} × ${cart[id]}</span>
-<span>${money(p.price*cart[id])}
-<button class="remove" onclick="removeItem(${id})">Quitar</button></span>
-</div>`;
-}).join("")
-:"Todavía no has agregado productos.";
+function agregar(id){
+ const item = carrito.find(p => p.id === id);
+ if(item){item.cantidad++;}
+ else{
+  const p = productos.find(p => p.id === id);
+  carrito.push({...p,cantidad:1});
+ }
+ mostrarCarrito();
 }
 
-function checkout(){
-const ids=Object.keys(cart);
-if(!ids.length){
-alert("Agrega un producto al carrito primero.");
-return;
+function quitar(id){
+ carrito = carrito.filter(p => p.id !== id);
+ mostrarCarrito();
 }
-let message="Hola, Mundo Fácil Store. Quiero hacer este pedido:\n";
-let total=0;
-ids.forEach(id=>{
-const p=products.find(p=>p.id==id);
-message+=`\n${p.name} x ${cart[id]} = ${money(p.price*cart[id])} COP`;
-total+=p.price*cart[id];
-});
-message+=`\n\nTotal de productos: ${money(total)} COP`;
-message+="\n¿Me confirman disponibilidad, envío y formas de pago?";
-window.open("https://wa.me/"+whatsapp+"?text="+encodeURIComponent(message),"_blank");
+
+function mostrarCarrito(){
+ const contenedor = document.getElementById("items");
+ if(carrito.length === 0){
+  contenedor.innerHTML = "Tu carrito está vacío.";
+ }else{
+  contenedor.innerHTML = carrito.map(p => `
+  <p>${p.emoji} ${p.nombre} × ${p.cantidad}
+  — ${dinero(p.precio*p.cantidad)}
+  <button class="remove" onclick="quitar(${p.id})">Quitar</button>
+  </p>`).join("");
+ }
+ const total = carrito.reduce((s,p)=>s+p.precio*p.cantidad,0);
+ document.getElementById("total").textContent = "Total: "+dinero(total);
 }
+
+function pedir(){
+ if(carrito.length === 0){
+  alert("Agrega al menos un producto al carrito.");
+  return;
+ }
+ let mensaje = "Hola, Mundo Fácil Store. Quiero hacer este pedido:%0A";
+ carrito.forEach(p=>{
+  mensaje += "%0A- "+p.nombre+" x"+p.cantidad+
+  " = "+dinero(p.precio*p.cantidad);
+ });
+ const total = carrito.reduce((s,p)=>s+p.precio*p.cantidad,0);
+ mensaje += "%0A%0ATotal: "+dinero(total);
+ mensaje += "%0APor favor, confirmen disponibilidad, envío y forma de pago.";
+ window.location.href =
+ "https://wa.me/"+whatsapp+"?text="+mensaje;
+}
+
+mostrarProductos();
+mostrarCarrito();
 </script>
 </body>
 </html>
